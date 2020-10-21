@@ -189,6 +189,6 @@ public class SellerDaoJDBC implements SellerDao{
 	}
 	
 	private Seller instanceSeller(ResultSet rst, Department department) throws SQLException {
-		return new Seller(rst.getInt("Id"),rst.getString("Name"), rst.getString("Email"),rst.getDate("DateBirth"), rst.getDouble("BaseSalary"), department);
+		return new Seller(rst.getInt("Id"), rst.getString("Name"), rst.getString("Email"), rst.getDate("DateBirth"), rst.getDouble("BaseSalary"), department);
 	}
 }
