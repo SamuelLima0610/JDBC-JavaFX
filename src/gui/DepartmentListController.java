@@ -3,9 +3,11 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import application.Main;
+import db.DbException;
 import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
@@ -18,7 +20,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -28,6 +32,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Department;
 import model.service.DepartmentService;
+
 
 public class DepartmentListController implements Initializable, DataChangeListener {
 
@@ -44,6 +49,9 @@ public class DepartmentListController implements Initializable, DataChangeListen
 
 	@FXML
 	private TableColumn<Department, Department> tableColumnEDIT;
+
+	@FXML
+	private TableColumn<Department, Department> tableColumnREMOVE;
 
 	@FXML
 	private Button btnNew;
@@ -76,6 +84,7 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		obsList = FXCollections.observableArrayList(list);
 		tableDepartment.setItems(obsList);
 		initEditButtons();
+		initRemoveButtons();
 	}
 
 	@FXML
@@ -120,7 +129,46 @@ public class DepartmentListController implements Initializable, DataChangeListen
 				}
 				setGraphic(button);
 				button.setOnAction(
-						event -> createDialogForm(obj,  Utils.currentStage(event),"/gui/DepartmentForm.fxml"));
+						event -> createDialogForm(obj, Utils.currentStage(event), "/gui/DepartmentForm.fxml"));
+			}
+		});
+	}
+
+	private void initRemoveButtons() {
+		tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		tableColumnREMOVE.setCellFactory(param -> new TableCell<Department, Department>() {
+			private final Button button = new Button("remove");
+
+			@Override
+			protected void updateItem(Department obj, boolean empty) {
+				super.updateItem(obj, empty);
+				if (obj == null) {
+					setGraphic(null);
+					return;
+				}
+				setGraphic(button);
+				button.setOnAction(event -> removeEntity(obj));
+			}
+
+			private void removeEntity(Department obj) {
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle("Configuration");
+				alert.setHeaderText(null);
+				alert.setContentText("Are you sure to delete?");
+				Optional<ButtonType> result = alert.showAndWait();
+
+				if (result.get() == ButtonType.OK) {
+					if (service == null) {
+						throw new IllegalStateException("Service was null");
+					}
+					try {
+						service.delete(obj);
+						DepartmentListController.this.updateTableView();
+					}
+					catch (DbException e) {
+						Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
+					}
+				}
 			}
 		});
 	}

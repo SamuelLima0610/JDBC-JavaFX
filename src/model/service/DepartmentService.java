@@ -21,4 +21,8 @@ public class DepartmentService {
 			dao.insert(obj);
 		}
 	}
+	
+	public void delete(Department obj) {
+		dao.deleteById(obj.getId());
+	}
 }
