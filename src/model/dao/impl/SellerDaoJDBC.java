@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,10 +123,10 @@ public class SellerDaoJDBC implements SellerDao{
 		ResultSet rst = null;
 		try {
 			st = conn.createStatement();
-			rst = st.executeQuery("SELECT seller.*,Deparment.Name as DepNameFROM " +
+			rst = st.executeQuery("SELECT seller.*,Department.Name as DepName " +
 					"FROM seller INNER JOIN department " + 
 					"ON seller.Id = department.Id " + 
-					"ORDER BY Name");
+					"ORDER BY Name;");
 			Map<Integer, Department> map = new HashMap<>();
 			List<Seller> sellers = new ArrayList<>();
 			Department dep = null;
@@ -159,7 +158,7 @@ public class SellerDaoJDBC implements SellerDao{
 					"FROM seller INNER JOIN department " + 
 					"ON seller.Id = department.Id " + 
 					"WHERE DepartmentId = ? " +
-					"ORDER BY Name");
+					"ORDER BY Name;");
 			st.setInt(1, department.getId());
 			rst = st.executeQuery();
 			Map<Integer, Department> map = new HashMap<>();
@@ -189,6 +188,13 @@ public class SellerDaoJDBC implements SellerDao{
 	}
 	
 	private Seller instanceSeller(ResultSet rst, Department department) throws SQLException {
-		return new Seller(rst.getInt("Id"),rst.getString("Name"), rst.getString("Email"),rst.getDate("DateBirth"), rst.getDouble("BaseSalary"), department);
+		Seller obj = new Seller();
+		obj.setId(rst.getInt("Id"));
+		obj.setName(rst.getString("Name"));
+		obj.setEmail(rst.getString("Email"));
+		obj.setBaseSalary(rst.getDouble("BaseSalary"));
+		obj.setBirthDate(new java.util.Date(rst.getTimestamp("BirthDate").getTime()));
+		obj.setDepartment(department);
+		return obj;
 	}
 }
