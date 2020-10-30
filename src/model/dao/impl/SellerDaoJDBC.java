@@ -158,7 +158,7 @@ public class SellerDaoJDBC implements SellerDao{
 					"FROM seller INNER JOIN department " + 
 					"ON seller.Id = department.Id " + 
 					"WHERE DepartmentId = ? " +
-					"ORDER BY Name");
+					"ORDER BY Name;");
 			st.setInt(1, department.getId());
 			rst = st.executeQuery();
 			Map<Integer, Department> map = new HashMap<>();
